@@ -59,7 +59,6 @@ Dictionary parseDictionary(const std::string& fileName) {
     while (std::getline(in, line)) {
         std::string key;
         int value;
-
         size_t delimiter = line.find(',');
         if (delimiter != std::string::npos) {
             key = line.substr(0, delimiter);
@@ -67,10 +66,8 @@ Dictionary parseDictionary(const std::string& fileName) {
                 value = std::stoi(line.substr(delimiter + 1));
                 dict[key] = value;
             } catch (const std::invalid_argument& e) {
-                // Обработка ошибки преобразования в число
                 std::cerr << "Error converting to integer: " << e.what() << std::endl;
             } catch (const std::out_of_range& e) {
-                // Обработка ошибки переполнения
                 std::cerr << "Out of range error: " << e.what() << std::endl;
             }
         }
@@ -101,6 +98,7 @@ Words parseWords(const std::string& fileName) {
     return words;
 }
 
+
 AnagramsForOneWord getAllAnagrams(const std::string& word, const Dictionary& dict) {
     AnagramsForOneWord result;
 
@@ -122,6 +120,7 @@ AnagramTable getAnagramTable(const std::string& parseFile, const std::string& di
     Words words = parseWords(parseFile);
 
     AnagramTable table;
+
     for (const auto& word : words) {
         AnagramsForOneWord anagramsW = getAllAnagrams(word, dict);
         if (anagramsW.empty()) {
@@ -143,9 +142,11 @@ void generateAllAnagramCombinations(const AnagramTable& input, AnagramTable& all
 
         size_t currentIndex = currentCombination.size();
 
+        // If the current combination is complete, add it to the result.
         if (currentIndex == input.size()) {
             allCombinations.push_back(currentCombination);
         } else {
+            // Otherwise, extend the current combination with words from the current index.
             const AnagramsForOneWord& currentVector = input[currentIndex];
 
             for (const std::pair<std::string, int>& word : currentVector) {
@@ -159,6 +160,7 @@ void generateAllAnagramCombinations(const AnagramTable& input, AnagramTable& all
 
 void print(const AnagramTable& table) {
     AnagramTable allCombinations;
+
     generateAllAnagramCombinations(table, allCombinations);
 
     std::vector<std::pair<std::string, int>> tempVector1;
@@ -177,16 +179,20 @@ void print(const AnagramTable& table) {
         do {
             std::string strTemp = "";
             int count = 0;
+            // Concatenate strings and accumulate weights.
             for (auto it : tempVector) {
                 count += it.second;
                 strTemp += it.first + ' ';
             }
+            // Add the result to the temporary vector.
             tempVector1.push_back(std::make_pair(strTemp, count));
         } while (std::prev_permutation(tempVector.begin(), tempVector.end()));
     }
 
+    // Sort the final vector in descending order based on the total weight.
     sortPairsDescending(tempVector1);
 
+    // Print the final result.
     for (auto& it : tempVector1) {
         std::cout << it.first + ' ' << "| weight = " << it.second << std::endl;
     }
